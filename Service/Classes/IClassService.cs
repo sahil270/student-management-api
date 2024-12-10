@@ -7,7 +7,7 @@ namespace Service
         Task<ClassDto?> AddClassAsync(ClassDto dto);
         Task<ClassDto?> DeleteClassAsync(int id);
         Task<ClassDto?> GetAllClassByIdAsync(int id);
-        Task<List<ClassDto>?> GetAllClassesAsync();
+        Task<PagedResultDto> GetAllClassesAsync(PageFilterParams model);
         Task<ClassDto?> UpdateClassAsync(int id, ClassDto dto);
     }
 }

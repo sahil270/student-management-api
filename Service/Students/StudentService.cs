@@ -4,11 +4,7 @@ using Data.Models;
 using Dto;
 using Microsoft.EntityFrameworkCore;
 using Repo;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace Service
 {
@@ -26,9 +22,39 @@ namespace Service
             _classRepository = classRepository;
         }
 
-        public async Task<List<StudentDto>?> GetAllStudentesAsync()
+        public async Task<PagedResultDto?> GetAllStudentesAsync(PageFilterParams model)
         {
-            return await _studentRepository.GetAll().Select(x => _mapper.Map<StudentDto>(x)).ToListAsync();
+
+            var searchPattern = model.SearchKeyword!.ToFilterPattern();
+
+            Expression<Func<Student, bool>> filter = x => EF.Functions.Like(x.FirstName, searchPattern)
+                                                                || EF.Functions.Like(x.LastName, searchPattern)
+                                                                || EF.Functions.Like(x.EmailId, searchPattern)
+                                                                || EF.Functions.Like(x.PhoneNumber, searchPattern)
+                                                                || ( x.Class != null
+                                                                && EF.Functions.Like(x.Class.Name, searchPattern));
+
+            var resultQuery = _studentRepository.GetAll(filter).Include(x => x.Class)
+                            .Select(x => _mapper.Map<StudentDto>(x));
+
+            if (!string.IsNullOrEmpty(model.SortBy))
+            {
+                Expression<Func<Student, object>> sort = model.SortBy.BuildSortExpression<Student>();
+
+                if (model.IsDescending)
+                    resultQuery = resultQuery.OrderByDescending(sort);
+                else
+                    resultQuery = resultQuery.OrderBy(sort);
+            }
+
+            var totalCount = await resultQuery.CountAsync();
+            var data = await resultQuery.Skip((model.Page - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
+
+            return new PagedResultDto()
+            {
+                TotalCount = totalCount,
+                Data = data,
+            };
         }
 
         public async Task<StudentDto?> GetStudentByIdAsync(int id)
@@ -42,7 +68,7 @@ namespace Service
             return _mapper.Map<StudentDto>(StudentObj);
         }
 
-        public async Task<StudentDto?> GetAllStudentByClassIdAsync(int classId)
+        public async Task<List<StudentDto>?> GetAllStudentByClassIdAsync(int classId)
         {
             var studentsList = await _studentRepository.GetAll(x => x.ClassId.Equals(classId))
                 .Select(x => _mapper.Map<StudentDto>(x))

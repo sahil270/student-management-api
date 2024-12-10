@@ -4,6 +4,7 @@ using Data.Models;
 using Dto;
 using Microsoft.EntityFrameworkCore;
 using Repo;
+using System.Linq.Expressions;
 
 namespace Service
 {
@@ -19,9 +20,32 @@ namespace Service
             _mapper = mapper;
         }
 
-        public async Task<List<ClassDto>?> GetAllClassesAsync()
+        public async Task<PagedResultDto> GetAllClassesAsync(PageFilterParams model)
         {
-            return await _classRepository.GetAll().Select(x => _mapper.Map<ClassDto>(x)).ToListAsync();
+            var searchPattern = model.SearchKeyword!.ToFilterPattern();
+
+            Expression<Func<Class, bool>> filter = x => EF.Functions.Like(x.Name, searchPattern);
+
+            var resultQuery = _classRepository.GetAll(filter).Select(x => _mapper.Map<ClassDto>(x));
+
+            if (!string.IsNullOrEmpty(model.SortBy))
+            {
+                Expression<Func<Class, object>> sort = model.SortBy.BuildSortExpression<Class>();
+
+                if (model.IsDescending)
+                    resultQuery = resultQuery.OrderByDescending(sort);
+                else
+                    resultQuery = resultQuery.OrderBy(sort);
+            }
+
+            var totalCount = await resultQuery.CountAsync();
+            var data = await resultQuery.Skip((model.Page-1)* model.PageSize).Take(model.PageSize).ToListAsync();
+
+            return new PagedResultDto()
+            {
+                TotalCount = totalCount,
+                Data = data,
+            };
         }
 
         public async Task<ClassDto?> GetAllClassByIdAsync(int id)

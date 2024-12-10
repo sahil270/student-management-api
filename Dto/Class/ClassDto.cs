@@ -14,3 +14,4 @@ namespace Dto
 
         public virtual ICollection<StudentDto>? Students { get; set; } = [];
     }
+}

@@ -7,9 +7,9 @@ namespace Service
         Task<StudentDto?> AddStudentAsync(StudentDto dto);
         Task<StudentDto?> AssignStudentToClass(int id, int classId);
         Task<StudentDto?> DeleteStudentAsync(int id);
-        Task<StudentDto?> GetAllStudentByClassIdAsync(int classId);
+        Task<List<StudentDto>?> GetAllStudentByClassIdAsync(int classId);
         Task<StudentDto?> GetStudentByIdAsync(int id);
-        Task<List<StudentDto>?> GetAllStudentesAsync();
+        Task<PagedResultDto?> GetAllStudentesAsync(PageFilterParams model);
         Task<StudentDto?> UpdateStudentAsync(int id, StudentDto dto);
     }
 }

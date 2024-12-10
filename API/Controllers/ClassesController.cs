@@ -18,10 +18,10 @@ namespace API.Controllers
         }
 
         // GET: api/<ClassesController>
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        [HttpPost("GetAll")]
+        public async Task<IActionResult> Get([FromBody] PageFilterParams model)
         {
-            var data = await _classesService.GetAllClassesAsync();
+            var data = await _classesService.GetAllClassesAsync(model);
             var response = new BaseResponse(StatusCodes.Status200OK, data);
 
             return StatusCode(response.StatusCode, response);
