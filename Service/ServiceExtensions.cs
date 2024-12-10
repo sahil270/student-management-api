@@ -6,7 +6,8 @@ namespace Service
     {
         public static void AddServices(this IServiceCollection services)
         {
-            services.AddTransient<IClassesService, ClassesService>();
+            services.AddTransient<IClassService, ClassService>();
+            services.AddTransient<IStudentService, StudentService>();
         }
     }
 }

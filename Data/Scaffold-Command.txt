@@ -1,0 +1,6 @@
+﻿Scaffold-DbContext "user id=Sahil270_SQLLogin_1;pwd=pz7czdq6jr;data source=student_management_db.mssql.somee.com;persist security info=False;initial catalog=student_management_db;TrustServerCertificate=True" 
+	-Provider Microsoft.EntityFrameworkCore.SqlServer 
+	-OutputDir Models 
+	-ContextDir Contexts 
+	-Context StudentManagementDbContext 
+	-DataAnnotations

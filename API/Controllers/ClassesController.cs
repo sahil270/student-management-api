@@ -10,9 +10,9 @@ namespace API.Controllers
     [ApiController]
     public class ClassesController : ControllerBase
     {
-        private readonly IClassesService _classesService;
+        private readonly IClassService _classesService;
 
-        public ClassesController(IClassesService classesService)
+        public ClassesController(IClassService classesService)
         {
             _classesService = classesService;
         }
@@ -50,7 +50,9 @@ namespace API.Controllers
             }
             else
             {
-              var data = await _classesService.AddClassAsync(value);
+                var data = await _classesService.AddClassAsync(value);
+                response.Message = "Added SuccessFully";
+                response.Data = data;
             }
 
             return StatusCode(response.StatusCode, response);
@@ -61,7 +63,7 @@ namespace API.Controllers
         [HttpPut("{id}")]
         public  async Task<IActionResult> Put(int id, [FromBody] ClassDto value)
         {
-            var response = new BaseResponse(StatusCodes.Status201Created);
+            var response = new BaseResponse(StatusCodes.Status200OK);
             if (ModelState.IsValid)
             {
                 response.StatusCode = StatusCodes.Status400BadRequest;
@@ -70,6 +72,9 @@ namespace API.Controllers
             else
             {
                 var data = await _classesService.UpdateClassAsync(id, value);
+                response.Data = data;
+                response.Message = "Updated SuccessFully";
+
             }
             return StatusCode(response.StatusCode, response);
         }
@@ -78,8 +83,8 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public  async Task<IActionResult> Delete(int id)
         {
-            var data = await _classesService.GetAllClassByIdAsync(id);
-            var response = new BaseResponse(StatusCodes.Status200OK, data);
+            await _classesService.DeleteClassAsync(id);
+            var response = new BaseResponse(StatusCodes.Status200OK, null, "Deleted SuccessFully");
 
             return StatusCode(response.StatusCode, response);
         }

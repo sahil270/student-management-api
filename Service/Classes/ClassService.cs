@@ -7,13 +7,13 @@ using Repo;
 
 namespace Service
 {
-    public class ClassesService : IClassesService
+    public class ClassService : IClassService
     {
         private readonly IRepository<Class> _classRepository;
         private readonly IMapper _mapper;
         private bool disposedValue;
 
-        public ClassesService(IRepository<Class> classRepository, IMapper mapper)
+        public ClassService(IRepository<Class> classRepository, IMapper mapper)
         {
             _classRepository = classRepository;
             _mapper = mapper;
@@ -51,12 +51,15 @@ namespace Service
             if (classObj == null)
                 throw new APIException(400, $"No Class found with Id: {id}");
 
+            classObj.Description = dto.Description;
+            classObj.Name = dto.Name;
+
             classObj = await _classRepository.Update(classObj!);
 
             return _mapper.Map<ClassDto>(classObj);
         }
 
-        public async Task<ClassDto?> DeleteClassAsync(int id, ClassDto dto)
+        public async Task<ClassDto?> DeleteClassAsync(int id)
         {
             var classObj = await _classRepository.GetFirst(x => x.ClassId.Equals(id), true);
 
